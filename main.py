@@ -1,6 +1,7 @@
-
+import web
 from openpyxl.utils import get_column_letter, column_index_from_string
 from openpyxl import load_workbook
+
 
 #Определяет кол-во записей
 def GetSize(_sheet):
@@ -48,3 +49,9 @@ p = MakePersonList(sheet)
 
 for i in range(GetSize(sheet) - 1):
   print(p[i]['vol'])
+
+search = {'f':'Пылькин', 'ps': '100'}
+params = 0
+web.getRecord(search, page = 1, params = params)
+
+
