@@ -31,10 +31,10 @@ def MakePersonList(_sheet):
     j = 1
     params = []
     while (j < 23):
-      if (sheet[get_column_letter(j) + str(i)].value == None):
+      if (_sheet[get_column_letter(j) + str(i)].value == None):
         params.append('')
       else:
-        params.append(str(sheet[get_column_letter(j) + str(i)].value))
+        params.append(str(_sheet[get_column_letter(j) + str(i)].value))
       j += 1
     pers = ConcatLists(field_name, params)
     person_list.append(pers)
