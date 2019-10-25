@@ -8,11 +8,9 @@ def getDict(t):
 
 def main():
     #sheet = person.LoadFile("test")
-    #search = {'f':'Пылькин', 'ps': '100'}                  tests
-    #params = 0
-    #web.getRecord(search, page = 1, params = params)
-    reductions = getDict(1)
-    print(reductions)
+    search = {'f':'Пылькин', 'ps': '100'}
+    params = 0
+    web.getRecords(search, page = 1, params = params)
 
 if __name__ == "__main__":
     main()
