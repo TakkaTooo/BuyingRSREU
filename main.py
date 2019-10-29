@@ -15,7 +15,7 @@ def main():
     #shutil.copyfile(r"ts.xlsx", r"ts1.xlsx")
     time.sleep(1)
     #Кароч метод LoadFile не хочет возвращать wb, вывод питон - х##ня
-    wb = load_workbook("ts1.xlsx", data_only=True)
+    wb = load_workbook("test.xlsx", data_only=True)
     sheet = wb.active
 
     p = person.MakePersonList(sheet)
