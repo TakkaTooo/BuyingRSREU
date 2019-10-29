@@ -1,5 +1,5 @@
-#import web
-#import json
+import web
+import json
 import person
 import shutil
 import mparser
@@ -20,8 +20,15 @@ def main():
 
     p = person.MakePersonList(sheet)
     for perid in range(len(p)):
+        persons = []
         info = p[perid]['info']
         p[perid] = mparser.parse(info, p[perid])
+        params = {'Фамилия': p[perid]['surname'], 'Имя': p[perid]['name'], 'Отчество': p[perid]['faname'], 'Звание': p[perid]['rank'], 'Дата рождения/Возраст': p[perid]['birthyear'], 'Дата выбытия': p[perid]['deathday']}
+        persons = web.getRecords(1, params)
+        print('======================================')
+        for i in range (0, len(persons)):
+            print(persons[i])
+        print('======================================')
     size = person.GetSize(sheet)
     for i in range(2, size - 1):
         j = 6

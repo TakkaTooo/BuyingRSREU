@@ -1,4 +1,5 @@
 import requests
+import time
 from bs4 import BeautifulSoup
 
 def getAnswer(url, search):
@@ -25,24 +26,62 @@ def analyzeRecord(id, params = 0):
     data = {}
     for i in range(0, len(results)):
         data[str(titles[i+1].text)] = str(results[i].text)
-    print(data)
+    return data
 
-def getRecords(search, page, params):    
+def birthYear(d):
+    if (str(d).find('.') != -1):
+        dt = str(d).split('.')
+        return str(dt[2])
+    else:
+        return str(d)
+
+def deathDate(d):
+    if (str(d).find('Между') != -1):
+        d = d.split('и')
+        dt = str(d[1]).strip()
+    else:
+        dt = d
+    dt = str(dt).split('.')
+    for i in range(0, len(dt)):
+        dt[i] = str(dt[i]).replace('__', '00')
+    return dt
+
+def getRecords(page, params):    
     url = "https://obd-memorial.ru/html/search.htm"
+    search = {'f': 'T~' + params['Фамилия'], 'n': 'T~' + params['Имя'], 's': 'T~' + params['Отчество'], 'ps': '100', 'entity':'000000011111111', 'entities': '24,28,27,23,34,22,20,21,19'}
+    print(search)
+    persons = []
     r = getAnswer(url, search)
     count = findCount(r)
     print(page, ' - ', count)
-    if (count > 0):    #Найден хоть кто - то (в теории проходим по каждому и сравниваем с нашим человеком)
-        #-- Действия:                                                                           --#
-        #-- Выполняем запрос по id человека на сайте                                            --#
-        #-- Выполняем сравнивание данных из params c данными, которые получаем в ответе сервера --#
-        #-- Возвращаем значение, если совпало все как надо, не вызывая функцию еще раз          --#
+    if (count > 0):
         soup = BeautifulSoup(r.text, "html.parser")     
         ids = [tag['id'] for tag in soup.select('div[id]')] 
         for i in range(0, len(ids)):
+            percent = 0
             if (str(ids[i]).isdigit()):
-               analyzeRecord(ids[i]) 
+                person = analyzeRecord(ids[i])
+                print(person)
+                if (dict(person).keys().__contains__('Дата рождения/Возраст') and bool(str(params['Дата рождения/Возраст']))):
+                    person['Дата рождения/Возраст'] = birthYear(person['Дата рождения/Возраст'])
+                    print(person['Дата рождения/Возраст'], params['Дата рождения/Возраст'])
+                    if (person['Дата рождения/Возраст'] == params['Дата рождения/Возраст']):
+                        percent += 0.5
+                if (dict(person).keys().__contains__('Дата выбытия') and bool(str(params['Дата выбытия']))):
+                    #params['Дата выбытия'] = str(params['Дата выбытия']).split('.') Из - за того, что баг в парсинге даты выбытия в таблице
+                    person['Дата выбытия'] = deathDate(person['Дата выбытия'])
+                    print (person['Дата выбытия'], ' ', params['Дата выбытия'])
+                    if (person['Дата выбытия'][2] == params['Дата выбытия'][2]):
+                        percent += 0.3
+                        if (person['Дата выбытия'][1] == params['Дата выбытия'][1]):
+                            percent += 0.1
+                            if (person['Дата выбытия'][0] == params['Дата выбытия'][0]):
+                                percent += 0.1
+                person['percent'] = percent
+            if percent >= 0.5:
+                persons.append(person)
+        return persons
         if (count == 100):  #Возможно, что найдено более одной страницы (мало вероятно)
             search['p'] = str(page + 1)
-            getRecords(search, page + 1, params)
+            getRecords(page + 1, params)
     return 0
