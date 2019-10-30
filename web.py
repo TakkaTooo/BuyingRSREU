@@ -41,6 +41,7 @@ def deathDate(d):
         dt = str(d[1]).strip()
     else:
         dt = d
+        str(dt).strip()
     dt = str(dt).split('.')
     for i in range(0, len(dt)):
         dt[i] = str(dt[i]).replace('__', '00')
@@ -50,7 +51,7 @@ def getRecords(page, params):
     url = "https://obd-memorial.ru/html/search.htm"
     search = {'f': 'T~' + params['Фамилия'], 'n': 'T~' + params['Имя'], 's': 'T~' + params['Отчество'], 'ps': '100', 'entity':'000000011111111', 'entities': '24,28,27,23,34,22,20,21,19'}
     print(search)
-    params['Дата выбытия'] = str(params['Дата выбытия']).split('.')
+    params['Дата выбытия'] = deathDate(params['Дата выбытия'])
     persons = []
     r = getAnswer(url, search)
     count = findCount(r)
@@ -69,6 +70,7 @@ def getRecords(page, params):
                     print(person['Дата рождения/Возраст'], params['Дата рождения/Возраст'])
                     if (person['Дата рождения/Возраст'] == params['Дата рождения/Возраст']):
                         percent += 0.5
+                params['Дата выбытия'] = str(params['Дата выбытия']).strip()
                 if (dict(person).keys().__contains__('Дата выбытия') and bool(str(params['Дата выбытия']))):
                     person['Дата выбытия'] = deathDate(person['Дата выбытия'])
                     print (person['Дата выбытия'], ' ', params['Дата выбытия'])
@@ -85,4 +87,4 @@ def getRecords(page, params):
         if (count == 100):  #Возможно, что найдено более одной страницы (мало вероятно)
             search['p'] = str(page + 1)
             getRecords(page + 1, params)
-    return 0
+    return []

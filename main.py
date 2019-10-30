@@ -15,7 +15,7 @@ def main():
     #shutil.copyfile(r"ts.xlsx", r"ts1.xlsx")
     time.sleep(1)
     #Кароч метод LoadFile не хочет возвращать wb, вывод питон - х##ня
-    wb = load_workbook("ts1.xlsx", data_only=True)
+    wb = load_workbook("test1.xlsx", data_only=True)
     sheet = wb.active
 
     p = person.MakePersonList(sheet)
@@ -29,21 +29,25 @@ def main():
         print('======================================')
         max = 0
         maxpersons = []
-        for per in persons:
-            if (per['percent'] > max):
-                max = per['percent']
-        for per in persons:
-            if (per['percent'] == max):
-                maxpersons.append(per)
-        max = 0
-        maxindex = -1
-        for i in range(0, len(maxpersons)):
-            if len(str(maxpersons[i])) > max: 
-                max = len(str(maxpersons[i]))
-                maxindex = i
-        print('!!!', maxpersons[maxindex], '!!!')
-        print('======================================')
-        p[perid]['link'] = "https://obd-memorial.ru/html/info.htm?id=" + maxpersons[maxindex]['id']
+        if (persons != []):
+            for per in persons:
+                if (per['percent'] > max):
+                    max = per['percent']
+            for per in persons:
+                if (per['percent'] == max):
+                    maxpersons.append(per)
+            if (maxpersons != []):
+                max = 0
+                maxindex = -1
+                print(len(maxpersons))
+                for i in range(0, len(maxpersons)):
+                    print(len(str(maxpersons[i])) > max)
+                    if len(str(maxpersons[i])) > max: 
+                        max = len(str(maxpersons[i]))
+                        maxindex = i
+                print('!!!', maxpersons[maxindex], '!!!')
+                print('======================================')
+                p[perid]['link'] = "https://obd-memorial.ru/html/info.htm?id=" + maxpersons[maxindex]['id']
     size = person.GetSize(sheet)
     for i in range(2, size + 1):
         j = 6
