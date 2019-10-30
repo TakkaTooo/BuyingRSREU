@@ -25,7 +25,7 @@ def main():
         info = p[perid]['info']
         p[perid] = mparser.parse(info, p[perid])
         params = {'Фамилия': p[perid]['surname'], 'Имя': p[perid]['name'], 'Отчество': p[perid]['faname'], 'Звание': p[perid]['rank'], 'Дата рождения/Возраст': p[perid]['birthyear'], 'Дата выбытия': p[perid]['deathday']}
-        persons = web.getRecords(1, params)
+        #persons = web.getRecords(1, params)
         print('======================================')
         max = 0
         maxpersons = []

@@ -43,4 +43,4 @@ def MakePersonList(_sheet):
 #Возвращает активный лист(первый) в книге
 def LoadFile(file_name):
     wb = load_workbook(filename=file_name+".xlsx", data_only=True)
-    return wb.active
+    return wb
