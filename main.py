@@ -15,7 +15,7 @@ def main():
     #shutil.copyfile(r"ts.xlsx", r"ts1.xlsx")
     time.sleep(1)
     #Кароч метод LoadFile не хочет возвращать wb, вывод питон - х##ня
-    wb = load_workbook("ts1.xlsx", data_only=True)
+    wb = load_workbook("test.xlsx", data_only=True)
     sheet = wb.active
 
     p = person.MakePersonList(sheet)
@@ -25,7 +25,7 @@ def main():
         info = p[perid]['info']
         p[perid] = mparser.parse(info, p[perid])
         params = {'Фамилия': p[perid]['surname'], 'Имя': p[perid]['name'], 'Отчество': p[perid]['faname'], 'Звание': p[perid]['rank'], 'Дата рождения/Возраст': p[perid]['birthyear'], 'Дата выбытия': p[perid]['deathday']}
-        persons = web.getRecords(1, params)
+        #persons = web.getRecords(1, params)
         print('======================================')
         max = 0
         maxpersons = []
@@ -41,9 +41,9 @@ def main():
             if len(str(maxpersons[i])) > max: 
                 max = len(str(maxpersons[i]))
                 maxindex = i
-        print('!!!', maxpersons[maxindex], '!!!')
+        #print('!!!', maxpersons[maxindex], '!!!')
         print('======================================')
-        p[perid]['link'] = "https://obd-memorial.ru/html/info.htm?id=" + maxpersons[maxindex]['id']
+        #p[perid]['link'] = "https://obd-memorial.ru/html/info.htm?id=" + maxpersons[maxindex]['id']
     size = person.GetSize(sheet)
     for i in range(2, size + 1):
         j = 6

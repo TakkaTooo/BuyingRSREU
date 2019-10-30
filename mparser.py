@@ -7,8 +7,8 @@ import json
 # род. Рязанская обл., Шацкий рн, рядовой, 
 # 907 сп, 244 сд, пропал без вести 24. 02. 43 г.
 
-reason = ['погиб', 'пропал без вести', 'погиб в плену',
-          'умер от ран', 'неизвестно']
+reason = ['пропал без вести', 'погиб в плену',
+          'умер от ран', 'неизвестно', 'погиб']
 
 season = {'январ' : '01', 'феврал' : '02', 'март' : '03', 'апрел' : '04', 'ма' : '05', 'июн' : '06', 
           'июл' : '07', 'август' : '08', 'сентябр' : '09', 'октябр' : '10', 'ноябр' : '11', 'декабре' : '12'}
@@ -33,7 +33,7 @@ def parse(info, person):
     j = 0
     while (j < len(_list)):
         #Обработка года рождения / место рождения (область)
-        if ((j < len(_list)) and (_list[j].find('род.') and bornyear == False) == 0):
+        if ((j < len(_list)) and _list[j].find('род.') >= 0):
             args = _list[j][5:len(_list[j])]
             if (args.find('г.') > 0):
                 cleanargs = args[0:args.find('г.')]
@@ -41,25 +41,33 @@ def parse(info, person):
                 checkby = True
                 _person['birthyear'] = cleanargs
                 j += 1
-            elif ((j < len(_list)) and args.find('обл.') >= 0 or args.find('рн') >= 0 or args.find('с.') >= 0 or args.find('гор.') >= 0):
+            elif ((j < len(_list)) and (args.find('обл.') >= 0 or args.find('рн') >= 0 or args.find('с.') >= 0 or args.find('гор.') >= 0)):
                 cleanargs = args
                 bornplace = True
-                _person['born_place'] = cleanargs
                 j += 1
-                if ((j < len(_list)) and (_list[j].find('рн') >= 0 or _list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0) and (_list[j].find('место захоронения') < 0)):
+                if ((j < len(_list)) and (_list[j].find('рн') >= 0 or _list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0 or _list[j].find('г.')) and (_list[j].find('место захоронения') < 0) and isThisBadSituation(_list[j]) == False):
+                    cleanargs += ', ' + _list[j]
                     j += 1
-                    if ((j < len(_list)) and (_list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0) and (_list[j].find('место захоронения') < 0)):
+                    if ((j < len(_list)) and (_list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0) and (_list[j].find('место захоронения') < 0)  and isThisBadSituation(_list[j]) == False):
+                        cleanargs += ', ' + _list[j]
                         j += 1
+
+                _person['born_place'] = cleanargs
+            else:
+                j += 1
             continue
         #Обработка места рождения (область)
-        elif ((j < len(_list)) and (_list[j].find('обл.') >= 0 or _list[j].find('рн') >= 0 or _list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0) and (_list[j].find('место захоронения') < 0) and bornplace == False):
+        elif ((j < len(_list)) and (_list[j].find('обл.') >= 0 or _list[j].find('рн') >= 0 or _list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0) and (_list[j].find('место захоронения') < 0)):
             bornplace = True
-            _person['born_place'] = _list[j]
+            cleanargs = _list[j]
             j += 1
-            if ((j < len(_list)) and (_list[j].find('рн') >= 0 or _list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0) and (_list[j].find('место захоронения') < 0)):
+            if ((j < len(_list)) and (_list[j].find('рн') >= 0 or _list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0 or _list[j].find('г.') >= 0) and (_list[j].find('место захоронения') < 0)  and isThisBadSituation(_list[j]) == False):
+                cleanargs += ', ' + _list[j]
                 j += 1
-                if ((j < len(_list)) and (_list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0) and (_list[j].find('место захоронения') < 0)):
+                if ((j < len(_list)) and (_list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0 or _list[j].find('г.') >= 0) and (_list[j].find('место захоронения') < 0)  and isThisBadSituation(_list[j]) == False):
+                    cleanargs += ', ' + _list[j]
                     j += 1
+            _person['born_place'] = cleanargs
             continue
         #Обработка звания
         elif ((j < len(_list)) and isFuckingRank(_list[j])):
@@ -107,6 +115,14 @@ def parse(info, person):
                         a = '.19' + a
                         cleanargs = cleanargs[0:i] + a
                         break
+                word = ''
+                for i in range(len(cleanargs)):
+                    if (cleanargs[i] == '.'):
+                        break
+                    else:
+                        word += cleanargs[i]
+                if (len(word) == 1):
+                    cleanargs = '0' + cleanargs
                 _person['deathday'] = cleanargs
             j += 1
             continue
@@ -115,12 +131,22 @@ def parse(info, person):
             l = len('место захоронения')
             f = _list[j].find('место захоронения')
             num = f+l
-            word = _list[j][num:len(_list[j])] + ', '
+            word = _list[j][num:len(_list[j])]
+            more = False
             j += 1
+            if (j < len(_list)):
+                word += ', '
+                more = True
+            else:
+                if (_list[j-1].find('обл.') < 0):
+                    word = word[0:len(word)-1]
             while (j < len(_list)):
                 word += _list[j]
                 j += 1
-            _person['burial_place'] = word
+            if (more):
+                _person['burial_place'] = word[0:len(word)-1]
+            else:
+                _person['burial_place'] = word
             continue
         #Обработка специальности
         elif ((j < len(_list) and containsInSpec(_list[j]))):
@@ -136,12 +162,17 @@ def parse(info, person):
                     while ((j < len(_list)) and containsInPart(_list[j], _person['vol'])):
                         word = ''
                         dic = getDict(_person['vol'])
+                        mylist = _list[j].split(' ')
                         red = list(dic.keys())
-                        for i in red:
-                            if (_list[j].find(i) > 0):
-                                word = _list[j].replace(i, dic[i])
-                                print(word, ' ', _list[j], ' ', dic[i])
-                                break
+                        for a in mylist:
+                            if (isNumber(a) == False):
+                                if (a[len(a)-1] == '.'):
+                                    a = a[0:len(a)-2]
+                                for i in red:
+                                    if (a == i):
+                                        word = _list[j].replace(i, dic[i])
+                                        print(word, ' ', _list[j], ' ', dic[i])
+                                        break
                         args4duty = args4duty + word + ' '
                         j += 1
                     _person['duty_place'] = args4duty
@@ -163,11 +194,22 @@ def getDict(t):
     with open("ReductionsJson/t" + str(t) + ".json", "r") as read_file:
         return json.load(read_file)            
 
+def isNumber(st):
+    for i in range(len(st)):
+        if(st[i].isdigit() == False):
+            return False
+    return True
+
 def containsInPart(st, vol):
+    mylist = st.split(' ')
     red = list((getDict(vol)).keys())
-    for i in red:
-        if (st.find(i) >= 0):
-            return True
+    for a in mylist:
+        if (isNumber(a) == False):
+            if (a[len(a)-1] == '.'):
+                a = a[0:len(a)-2]
+            for i in red:
+                if (a == i):
+                    return True    
     return False
 
 def isThisBadDate(st):
