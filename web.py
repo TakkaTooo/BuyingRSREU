@@ -33,11 +33,15 @@ def birthYear(d):
         dt = str(d).split('.')
         return str(dt[2])
     else:
+        d = str(d).strip()
         return str(d)
 
 def deathDate(d):
     if (str(d).find('Между') != -1):
         d = d.split('и')
+        dt = str(d[1]).strip()
+    elif (str(d).find('-') != -1):
+        d = d.split('-')
         dt = str(d[1]).strip()
     else:
         dt = d
@@ -47,44 +51,53 @@ def deathDate(d):
         dt[i] = str(dt[i]).replace('__', '00')
     return dt
 
-def getRecords(page, params):    
+def getRecords(page, params, per):    
     url = "https://obd-memorial.ru/html/search.htm"
-    search = {'f': 'T~' + params['Фамилия'], 'n': 'T~' + params['Имя'], 's': 'T~' + params['Отчество'], 'ps': '100', 'entity':'000000011111111', 'entities': '24,28,27,23,34,22,20,21,19'}
+    search = {'f': 'T~' + params['Фамилия'], 'n': 'T~' + params['Имя'], 's': 'T~' + params['Отчество'], 'ps': '100', 'entity':'000000011111111', 'entities': '24,28,27,23,34,22,20,21,19','p': page}
     print(search)
-    params['Дата выбытия'] = deathDate(params['Дата выбытия'])
-    persons = []
+    params['Дата рождения/Возраст'] = birthYear(params['Дата рождения/Возраст'])
+    if (page == 1):
+        params['Дата выбытия'] = str(params['Дата выбытия']).split('.')
+    persons = per
     r = getAnswer(url, search)
     count = findCount(r)
     print(page, ' - ', count)
     if (count > 0):
-        soup = BeautifulSoup(r.text, "html.parser")     
+        soup = BeautifulSoup(r.text, "html.parser")
         ids = [tag['id'] for tag in soup.select('div[id]')] 
         for i in range(0, len(ids)):
             percent = 0
             if (str(ids[i]).isdigit()):
                 person = analyzeRecord(ids[i])
                 person['id'] = ids[i]
-                print(person)
-                if (dict(person).keys().__contains__('Дата рождения/Возраст') and bool(str(params['Дата рождения/Возраст']))):
-                    person['Дата рождения/Возраст'] = birthYear(person['Дата рождения/Возраст'])
-                    print(person['Дата рождения/Возраст'], params['Дата рождения/Возраст'])
-                    if (person['Дата рождения/Возраст'] == params['Дата рождения/Возраст']):
-                        percent += 0.5
-                params['Дата выбытия'] = str(params['Дата выбытия']).strip()
-                if (dict(person).keys().__contains__('Дата выбытия') and bool(str(params['Дата выбытия']))):
-                    person['Дата выбытия'] = deathDate(person['Дата выбытия'])
-                    print (person['Дата выбытия'], ' ', params['Дата выбытия'])
-                    if (person['Дата выбытия'][2] == params['Дата выбытия'][2]):
-                        percent += 0.3
-                        if (person['Дата выбытия'][1] == params['Дата выбытия'][1]):
-                            percent += 0.1
-                            if (person['Дата выбытия'][0] == params['Дата выбытия'][0]):
-                                percent += 0.1
+                try:
+                    if (dict(person).keys().__contains__('Дата рождения/Возраст') and bool(str(params['Дата рождения/Возраст']))):
+                        person['Дата рождения/Возраст'] = birthYear(person['Дата рождения/Возраст'])
+                        print(person['Дата рождения/Возраст'], params['Дата рождения/Возраст'])
+                        if (person['Дата рождения/Возраст'] == params['Дата рождения/Возраст']):
+                            percent += 0.6
+                    if (dict(person).keys().__contains__('Дата выбытия') and bool(str(params['Дата выбытия'][0]))):
+                        person['Дата выбытия'] = deathDate(person['Дата выбытия'])
+                        print(person['id'], ' ', person['Дата выбытия'], ' ', params['Дата выбытия'])
+                        if (person['Дата выбытия'][2] == params['Дата выбытия'][2]):
+                            percent += 0.3
+                            if (person['Дата выбытия'][1] == params['Дата выбытия'][1]):
+                                percent += 0.2
+                                if (dict(person).keys().__contains__('Причина выбытия') and bool(str(params['Причина выбытия']))):
+                                    if (person['Причина выбытия'] == params['Причина выбытия']):
+                                        percent += 0.1
+                                if (person['Дата выбытия'][0] == params['Дата выбытия'][0]):
+                                    percent += 0.1
+                except Exception:
+                    print("Exception!")
                 person['percent'] = percent
-            if percent >= 0.5:
+                #print(person)
+            if percent >= 0.6:
+                print("DADADADA")
                 persons.append(person)
-        return persons
         if (count == 100):  #Возможно, что найдено более одной страницы (мало вероятно)
             search['p'] = str(page + 1)
-            getRecords(page + 1, params)
-    return []
+            getRecords(page + 1, params, persons)
+        else:
+            print(persons)
+    return list(persons)
