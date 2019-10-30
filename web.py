@@ -50,6 +50,7 @@ def getRecords(page, params):
     url = "https://obd-memorial.ru/html/search.htm"
     search = {'f': 'T~' + params['Фамилия'], 'n': 'T~' + params['Имя'], 's': 'T~' + params['Отчество'], 'ps': '100', 'entity':'000000011111111', 'entities': '24,28,27,23,34,22,20,21,19'}
     print(search)
+    params['Дата выбытия'] = str(params['Дата выбытия']).split('.')
     persons = []
     r = getAnswer(url, search)
     count = findCount(r)
@@ -61,6 +62,7 @@ def getRecords(page, params):
             percent = 0
             if (str(ids[i]).isdigit()):
                 person = analyzeRecord(ids[i])
+                person['id'] = ids[i]
                 print(person)
                 if (dict(person).keys().__contains__('Дата рождения/Возраст') and bool(str(params['Дата рождения/Возраст']))):
                     person['Дата рождения/Возраст'] = birthYear(person['Дата рождения/Возраст'])
@@ -68,7 +70,6 @@ def getRecords(page, params):
                     if (person['Дата рождения/Возраст'] == params['Дата рождения/Возраст']):
                         percent += 0.5
                 if (dict(person).keys().__contains__('Дата выбытия') and bool(str(params['Дата выбытия']))):
-                    #params['Дата выбытия'] = str(params['Дата выбытия']).split('.') Из - за того, что баг в парсинге даты выбытия в таблице
                     person['Дата выбытия'] = deathDate(person['Дата выбытия'])
                     print (person['Дата выбытия'], ' ', params['Дата выбытия'])
                     if (person['Дата выбытия'][2] == params['Дата выбытия'][2]):
