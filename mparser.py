@@ -15,6 +15,7 @@ season = {'январ' : '01', 'феврал' : '02', 'март' : '03', 'апр
 rank = ['рядовой', 'гвардии ефрейтор', 'старший сержант', 'ефрейтор', 'младший сержант',
         'лейтенант', 'капитан', 'майор', 'старшина', 'гвардии лейтенант', 'гвардии рядовой', 'гвардии младший лейтенант',
         'младший политрук']
+spec = []
 
 def parse(info, person):
     _person = person
@@ -86,7 +87,8 @@ def parse(info, person):
                         break
                 args = '00.' + month + '.'
                 a = _list[j].find('г.')
-                word = _list[j][_list[j].find(smth)+len(smth):a]
+                word = getOnlyNumbers(_list[j][_list[j].find(smth)+len(smth):a])
+                print(word)
                 args += word
                 _person['deathday'] = args
             elif((j < len(_list))):
@@ -121,27 +123,30 @@ def parse(info, person):
             _person['burial_place'] = word
             continue
         #Обработка специальности
-        elif ((j < len(_list)) and (bornyear == True or bornplace == True or rank == True) and (dutyplace == False and deathday == False and burialplace == False)):
+        elif ((j < len(_list) and containsInSpec(_list[j]))):
             spec = True
             _person['spec'] = _list[j]
             j += 1
             continue
         else:
-            j += 1
-        #Получение места службы
-        if (j < len(_list)):
-            args4duty = ''
-            while ((j < len(_list)) and (bornyear == True or bornplace == True or rank == True) and containsInPart(_list[j], _person['vol'])):
-                word = ''
-                dic = getDict(_person['vol'])
-                red = list(dic.keys())
-                for i in red:
-                    if (_list[j].find(i) > 0):
-                        word = _list[j].replace(i, dic[i])
-                        break
-                args4duty = args4duty + word + ' '
-                j += 1
-            _person['duty_place'] = args4duty
+            #Получение места службы
+            if (j < len(_list)):
+                args4duty = ''
+                if (containsInPart(_list[j], _person['vol'])):
+                    while ((j < len(_list)) and containsInPart(_list[j], _person['vol'])):
+                        word = ''
+                        dic = getDict(_person['vol'])
+                        red = list(dic.keys())
+                        for i in red:
+                            if (_list[j].find(i) > 0):
+                                word = _list[j].replace(i, dic[i])
+                                print(word, ' ', _list[j], ' ', dic[i])
+                                break
+                        args4duty = args4duty + word + ' '
+                        j += 1
+                    _person['duty_place'] = args4duty
+                else:
+                    j += 1
        
 
             
@@ -180,6 +185,19 @@ def isThisBadSituation(st):
 
 def isFuckingRank(st):
     for i in rank:
+        if (st.find(i) >= 0):
+            return True
+    return False
+
+def getOnlyNumbers(year):
+    word = ''
+    for i in range(len(year)):
+        if (str(year[i]).isdigit()):
+            word += year[i]
+    return word
+
+def containsInSpec(st):
+    for i in spec:
         if (st.find(i) >= 0):
             return True
     return False
