@@ -8,7 +8,9 @@ import json
 # 907 сп, 244 сд, пропал без вести 24. 02. 43 г.
 
 reason = ['пропал без вести', 'погиб в плену',
-          'умер от ран', 'неизвестно', 'погиб']
+          'умер от ран', 'неизвестно', 'пропапала без вести', 'погибла в плену',
+          'умерла от ран', 'умерла', 'умер', 'увековечен', 'увековечена', 
+          'пропала', 'пропал', 'погибла','погиб']
 
 season = {'январ' : '01', 'феврал' : '02', 'март' : '03', 'апрел' : '04', 'ма' : '05', 'июн' : '06', 
           'июл' : '07', 'август' : '08', 'сентябр' : '09', 'октябр' : '10', 'ноябр' : '11', 'декабре' : '12'}
@@ -16,6 +18,8 @@ rank = ['рядовой', 'гвардии ефрейтор', 'старший с�
         'лейтенант', 'капитан', 'майор', 'старшина', 'гвардии лейтенант', 'гвардии рядовой', 'гвардии младший лейтенант',
         'младший политрук']
 spec = []
+
+type_area = ['обл.', 'рн', 'г.', 'с.', 'д.']
 
 def parse(info, person):
     _person = person
@@ -39,16 +43,17 @@ def parse(info, person):
                 cleanargs = args[0:args.find('г.')]
                 bornyear = True
                 checkby = True
+                cleanargs = getOnlyNumbers(cleanargs)
                 _person['birthyear'] = cleanargs
                 j += 1
-            elif ((j < len(_list)) and (args.find('обл.') >= 0 or args.find('рн') >= 0 or args.find('с.') >= 0 or args.find('гор.') >= 0)):
+            elif (j < len(_list) and isItFuckingPlace(args)):
                 cleanargs = args
                 bornplace = True
                 j += 1
-                if ((j < len(_list)) and (_list[j].find('рн') >= 0 or _list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0 or _list[j].find('г.')) and (_list[j].find('место захоронения') < 0) and isThisBadSituation(_list[j]) == False):
+                if (j < len(_list) and isItFuckingPlace(args) and (_list[j].find('место захоронения') < 0) and isThisBadSituation(_list[j]) == False):
                     cleanargs += ', ' + _list[j]
                     j += 1
-                    if ((j < len(_list)) and (_list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0) and (_list[j].find('место захоронения') < 0)  and isThisBadSituation(_list[j]) == False):
+                    if (j < len(_list) and isItFuckingPlace(args) and (_list[j].find('место захоронения') < 0)  and isThisBadSituation(_list[j]) == False):
                         cleanargs += ', ' + _list[j]
                         j += 1
 
@@ -57,14 +62,14 @@ def parse(info, person):
                 j += 1
             continue
         #Обработка места рождения (область)
-        elif ((j < len(_list)) and (_list[j].find('обл.') >= 0 or _list[j].find('рн') >= 0 or _list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0) and (_list[j].find('место захоронения') < 0)):
+        elif (j < len(_list) and isItFuckingPlace(_list[j]) and (_list[j].find('место захоронения') < 0)):
             bornplace = True
             cleanargs = _list[j]
             j += 1
-            if ((j < len(_list)) and (_list[j].find('рн') >= 0 or _list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0 or _list[j].find('г.') >= 0) and (_list[j].find('место захоронения') < 0)  and isThisBadSituation(_list[j]) == False):
+            if (j < len(_list) and isItFuckingPlace(_list[j]) and (_list[j].find('место захоронения') < 0)  and isThisBadSituation(_list[j]) == False):
                 cleanargs += ', ' + _list[j]
                 j += 1
-                if ((j < len(_list)) and (_list[j].find('с.') >= 0 or _list[j].find('гор.') >= 0 or _list[j].find('г.') >= 0) and (_list[j].find('место захоронения') < 0)  and isThisBadSituation(_list[j]) == False):
+                if (j < len(_list) and isItFuckingPlace(_list[j]) and (_list[j].find('место захоронения') < 0)  and isThisBadSituation(_list[j]) == False):
                     cleanargs += ', ' + _list[j]
                     j += 1
             _person['born_place'] = cleanargs
@@ -100,6 +105,8 @@ def parse(info, person):
                 args += word
                 _person['deathday'] = args
             elif((j < len(_list))):
+                if (_list[j].find('в ') >= 0):
+                    secondin += 2
                 lastin = _list[j].find('г.')
                 arg = _list[j][firstin+secondin+1:lastin]
                 cleanargs = ''
@@ -183,6 +190,18 @@ def parse(info, person):
             
     return _person
 
+def isItFuckingPlace(place):
+    li = place.split()
+    for j in li:
+        for i in reason:
+            if (j == i):
+                return False
+    for i in li:
+        for j in type_area:
+            if (i == j):
+                return True
+    return False
+
 def splitShit(info):
     li = info.split(',')
     for i in li:
@@ -209,6 +228,7 @@ def containsInPart(st, vol):
                 a = a[0:len(a)-2]
             for i in red:
                 if (a == i):
+                    print(a)
                     return True    
     return False
 
@@ -234,7 +254,7 @@ def isFuckingRank(st):
 def getOnlyNumbers(year):
     word = ''
     for i in range(len(year)):
-        if (str(year[i]).isdigit()):
+        if (str(year[i]).isdigit() or year[i] == '.'):
             word += year[i]
     return word
 
