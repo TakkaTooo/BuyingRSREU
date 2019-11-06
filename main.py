@@ -13,9 +13,10 @@ def getDict(t):
 
 def main():
     #shutil.copyfile(r"ts.xlsx", r"ts1.xlsx")
+    s = input('Имя файла: ')
     time.sleep(1)
     #Кароч метод LoadFile не хочет возвращать wb, вывод питон - х##ня
-    wb = load_workbook("testleha1.xlsx", data_only=True)
+    wb = load_workbook("works/" + s + ".xlsx", data_only=True)
     sheet = wb.active
 
     p = person.MakePersonList(sheet)
@@ -58,7 +59,7 @@ def main():
             else:
                 sheet[get_column_letter(j) + str(i)].value = ""
             j += 1
-    wb.save("tx.xlsx")
+    wb.save("mades/" + s + ".xlsx")
 
 if __name__ == "__main__":
     main()
