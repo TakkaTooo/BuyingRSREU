@@ -1,5 +1,4 @@
 import requests
-import time
 from bs4 import BeautifulSoup
 
 def getAnswer(url, search):
@@ -54,9 +53,36 @@ def deathDate(d):
 def getRecords(page, params, per):    
     url = "https://obd-memorial.ru/html/search.htm"
     search = {'f': 'T~' + params['Фамилия'], 'n': 'T~' + params['Имя'], 's': 'T~' + params['Отчество'], 'ps': '100', 'entity':'000000011111111', 'entities': '24,28,27,23,34,22,20,21,19','p': page}
+    if page == 1:
+        if len(params['Дата выбытия']) == 8:
+            buff = params['Дата выбытия']
+            params['Дата выбытия'] = "00" + buff
+        elif len(params['Дата выбытия']) == 4:
+            buff = params['Дата выбытия']
+            params['Дата выбытия'] = "00.00." + buff
+        print(params['Дата выбытия'])
+    #00.00.0000
+    try:
+        params['Дата рождения/Возраст'] = birthYear(params['Дата рождения/Возраст'])
+    except Exception:
+        print('Exception')
+    try:
+        if len(params['Дата рождения/Возраст']) != 0:
+            search['bd'] = 'T~' + params['Дата рождения/Возраст']
+    except Exception:
+        print("BDEX")
+    try:
+        if len(params['Дата выбытия']) != 0:
+            if params['Дата выбытия'].find("00.00") == -1:
+                search["dateout"] = "T~" + params['Дата выбытия'][3:]
+            else:
+                search["dateout"] = "T~" + params['Дата выбытия'][6:]
+    except Exception:
+        print("DTOUTEX")
     print(search)
-    params['Дата рождения/Возраст'] = birthYear(params['Дата рождения/Возраст'])
-    if (page == 1):
+    if not "bd" in search and not "dateout" in search:
+        return []
+    if page == 1:              
         params['Дата выбытия'] = str(params['Дата выбытия']).split('.')
     persons = per
     r = getAnswer(url, search)

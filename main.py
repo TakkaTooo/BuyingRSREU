@@ -15,7 +15,8 @@ def main():
     #shutil.copyfile(r"ts.xlsx", r"ts1.xlsx")
     time.sleep(1)
     #Кароч метод LoadFile не хочет возвращать wb, вывод питон - х##ня
-    wb = load_workbook("testleha1.xlsx", data_only=True)
+    name = 'Files/Strelova_Ekaterina_Vasilyevna'
+    wb = load_workbook(name + ".xlsx", data_only=True)
     sheet = wb.active
 
     p = person.MakePersonList(sheet)
@@ -25,7 +26,7 @@ def main():
         info = p[perid]['info']
         p[perid] = mparser.parse(info, p[perid])
         params = {'Фамилия': p[perid]['surname'], 'Имя': p[perid]['name'], 'Отчество': p[perid]['faname'], 'Звание': p[perid]['rank'], 'Дата рождения/Возраст': p[perid]['birthyear'], 'Дата выбытия': p[perid]['deathday'], 'Причина выбытия': p[perid]['reason']}
-        #persons = web.getRecords(1, params, [])
+        persons = web.getRecords(1, params, [])
         max = 0
         maxpersons = []
         print(persons)
@@ -58,7 +59,7 @@ def main():
             else:
                 sheet[get_column_letter(j) + str(i)].value = ""
             j += 1
-    wb.save("tx.xlsx")
+    wb.save(name + "final.xlsx")
 
 if __name__ == "__main__":
     main()
