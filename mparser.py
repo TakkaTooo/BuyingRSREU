@@ -35,6 +35,8 @@ def parse(info, person):
     burialplace = False
 
     j = 0
+    print('############')
+    print (_list)
     while (j < len(_list)):
         #Обработка года рождения / место рождения (область)
         if ((j < len(_list)) and _list[j].find('род.') >= 0):
@@ -101,7 +103,6 @@ def parse(info, person):
                 args = '00.' + month + '.'
                 a = _list[j].find('г.')
                 word = getOnlyNumbers(_list[j][_list[j].find(smth)+len(smth):a])
-                print(word)
                 args += word
                 _person['deathday'] = args
             elif((j < len(_list))):
@@ -180,7 +181,6 @@ def parse(info, person):
                                 for i in red:
                                     if (a == i):
                                         word = _list[j].replace(i, dic[i])
-                                        print(word, ' ', _list[j], ' ', dic[i])
                                         break
                         args4duty = args4duty + word + ' '
                         j += 1
@@ -189,7 +189,7 @@ def parse(info, person):
                     j += 1
        
 
-            
+    print('############')        
     return _person
 
 def isItFuckingPlace(place):
@@ -230,7 +230,6 @@ def containsInPart(st, vol):
                 a = a[0:len(a)-2]
             for i in red:
                 if (a == i):
-                    print(a)
                     return True    
     return False
 
