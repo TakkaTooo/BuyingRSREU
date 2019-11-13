@@ -13,6 +13,7 @@ def getDict(t):
 
 def main():
     #shutil.copyfile(r"ts.xlsx", r"ts1.xlsx")
+    s = input('Имя файла: ')
     time.sleep(1)
     #Кароч метод LoadFile не хочет возвращать wb, вывод питон - х##ня
     name = 'Files/Strelova_Ekaterina_Vasilyevna'

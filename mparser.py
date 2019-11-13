@@ -75,11 +75,11 @@ def parse(info, person):
             _person['born_place'] = cleanargs
             continue
         #Обработка звания
-        elif ((j < len(_list)) and isFuckingRank(_list[j])):
-            rank = True
-            _person['rank'] = _list[j]
-            j += 1
-            continue
+        #elif ((j < len(_list)) and isFuckingRank(_list[j])):
+        #    rank = True
+        #    _person['rank'] = _list[j]
+        #    j += 1
+        #    continue
         #Получение даты смерти
         elif ((j < len(_list)) and isThisBadSituation(_list[j])):
             firstin = 0
@@ -108,7 +108,7 @@ def parse(info, person):
                 if (_list[j].find('в ') >= 0):
                     secondin += 2
                 lastin = _list[j].find('г.')
-                arg = _list[j][firstin+secondin+1:lastin]
+                arg = _list[j][firstin+secondin:lastin]
                 cleanargs = ''
                 for i in range(len(arg)):
                     if (arg[i] != ' '):
@@ -130,31 +130,33 @@ def parse(info, person):
                         word += cleanargs[i]
                 if (len(word) == 1):
                     cleanargs = '0' + cleanargs
+                if (p == 0):
+                    cleanargs = "00.00." + cleanargs
                 _person['deathday'] = cleanargs
             j += 1
             continue
         #Получение места захоронения
-        elif ((j < len(_list)) and _list[j].find('место захоронения') >= 0):
-            l = len('место захоронения')
-            f = _list[j].find('место захоронения')
-            num = f+l
-            word = _list[j][num:len(_list[j])]
-            more = False
-            j += 1
-            if (j < len(_list)):
-                word += ', '
-                more = True
-            else:
-                if (_list[j-1].find('обл.') < 0):
-                    word = word[0:len(word)-1]
-            while (j < len(_list)):
-                word += _list[j]
-                j += 1
-            if (more):
-                _person['burial_place'] = word[0:len(word)-1]
-            else:
-                _person['burial_place'] = word
-            continue
+        #elif ((j < len(_list)) and _list[j].find('место захоронения') >= 0):
+        #    l = len('место захоронения')
+        #    f = _list[j].find('место захоронения')
+        #    num = f+l
+        #    word = _list[j][num:len(_list[j])]
+        #    more = False
+        #    j += 1
+        #    if (j < len(_list)):
+        #        word += ', '
+        #        more = True
+        #    else:
+        #        if (_list[j-1].find('обл.') < 0):
+        #            word = word[0:len(word)-1]
+        #    while (j < len(_list)):
+        #        word += _list[j]
+        #        j += 1
+        #   if (more):
+        #        _person['burial_place'] = word[0:len(word)-1]
+        #    else:
+        #        _person['burial_place'] = word
+        #    continue
         #Обработка специальности
         elif ((j < len(_list) and containsInSpec(_list[j]))):
             spec = True
